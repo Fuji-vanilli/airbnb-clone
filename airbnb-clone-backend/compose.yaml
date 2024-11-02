@@ -1,9 +1,21 @@
 services:
   postgres:
     image: 'postgres:latest'
+    volumes:
+      - ~/volumes/fuji/postgresql/:/var/lib/postgresql/data
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_USER=fuji
     ports:
-      - '5432'
+      - 127.0.0.1:5432:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    expose:
+      - "5050"
