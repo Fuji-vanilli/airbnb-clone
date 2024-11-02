@@ -1,4 +1,4 @@
-package com.fuji.airbnb_clone_backend.user.entity;
+package com.fuji.airbnb_clone_backend.user.domain;
 
 import com.fuji.airbnb_clone_backend.shared.kernel.AbstractAuditingEntity;
 import jakarta.persistence.*;

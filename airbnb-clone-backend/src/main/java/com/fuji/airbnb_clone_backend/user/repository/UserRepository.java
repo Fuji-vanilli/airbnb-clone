@@ -1,6 +1,6 @@
 package com.fuji.airbnb_clone_backend.user.repository;
 
-import com.fuji.airbnb_clone_backend.user.entity.User;
+import com.fuji.airbnb_clone_backend.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

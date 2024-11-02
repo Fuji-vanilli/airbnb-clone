@@ -1,4 +1,4 @@
-package com.fuji.airbnb_clone_backend.user.entity;
+package com.fuji.airbnb_clone_backend.user.domain;
 
 
 import jakarta.persistence.Column;
@@ -22,5 +22,5 @@ public class Authority implements Serializable {
     @Column(length = 50)
     @NotNull
     @Size(max = 50)
-    private String id;
+    private String name;
 }
