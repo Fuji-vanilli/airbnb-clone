@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableJpaRepositories({
         "com.fuji.airbnb_clone_backend.user.repository",
-        "com.fuji.airbnb_clone_backend.listing.repository"
+        "com.fuji.airbnb_clone_backend.listing.repository",
+        "com.fuji.airbnb_clone_backend.booking.repository"
 })
 @EnableTransactionManagement
 @EnableJpaAuditing
