@@ -1,9 +1,16 @@
 package com.fuji.airbnb_clone_backend.infrastructure.config;
 
+import com.fuji.airbnb_clone_backend.user.domain.Authority;
 import com.fuji.airbnb_clone_backend.user.domain.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SecurityUtils {
     public static final String ROLE_TENANT= "ROLE_TENANT";
@@ -12,6 +19,7 @@ public class SecurityUtils {
 
     public static User mapOauth2AttributesToUser(Map<String, Object> attributes) {
         User user= new User();
+        String sub= String.valueOf(attributes.get("sub"));
         String username= null;
 
         if (!Objects.isNull(attributes.get("preferred_name"))) {
@@ -28,6 +36,60 @@ public class SecurityUtils {
             user.setLastname((String) attributes.get("nickname"));
         }
 
+        if (!Objects.isNull(attributes.get("email"))) {
+            user.setEmail((String) attributes.get("family_name"));
+        } else if (sub.contains("|") && (!Objects.isNull(username) && username.contains("@"))) {
+            user.setEmail(username);
+        } else {
+            user.setEmail(sub);
+        }
+
+        if (!Objects.isNull(attributes.get("picture"))) {
+            user.setImageUrl((String) attributes.get("picture"));
+        }
+
+        if (!Objects.isNull(attributes.get(CLAIMS_NAMESPACE))) {
+            List<String> authoritiesRaw= (List<String>) attributes.get(CLAIMS_NAMESPACE);
+
+            Set<Authority> authorities = authoritiesRaw.stream()
+                    .map(Authority::new)
+                    .collect(Collectors.toSet());
+
+            user.setAuthorities(authorities);
+        }
+
         return user;
     }
+
+    public static List<SimpleGrantedAuthority> extractAuthorityFromClaims(Map<String, Object> claims) {
+        return mapRolesToGrantedAuthorities(getRolesFromClaims(claims));
+    }
+
+    private static Collection<String> getRolesFromClaims(Map<String, Object> claims) {
+        return (Collection<String>) claims.get(CLAIMS_NAMESPACE);
+    }
+
+    private static List<SimpleGrantedAuthority> mapRolesToGrantedAuthorities(Collection<String> roles) {
+        return roles.stream()
+                .filter(role-> role.startsWith("ROLE_"))
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+    }
+
+    public static boolean hasCurrentUserAnyOfAuthorities(String ...authorities ){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return (!Objects.isNull(authentication) && getAuthorities(authentication)
+                .anyMatch(authority-> Arrays.asList(authorities).contains(authority)));
+    }
+    private static Stream<String> getAuthorities(Authentication authentication) {
+        Collection<? extends GrantedAuthority> authorities = authentication instanceof JwtAuthenticationToken jwtAuthenticationToken ?
+                extractAuthorityFromClaims(jwtAuthenticationToken.getToken().getClaims()) :
+                authentication.getAuthorities();
+
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority);
+    }
+
 }
+
