@@ -42,7 +42,7 @@ public class Listing extends AbstractAuditingEntity<Long> {
     private UUID publicId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "booking_category")
+    @Column(name = "category")
     private BookingCategory bookingCategory;
 
     @Column(name = "location")

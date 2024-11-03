@@ -24,8 +24,8 @@ public class ListingPicture extends AbstractAuditingEntity<Long> {
     @Column(name = "file", nullable = false)
     private byte[] file;
 
-    @Column(name = "content_type")
-    private String contentType;
+    @Column(name = "file_content_type")
+    private String fileContentType;
 
     @Column(name = "is_cover")
     private boolean isCover;
