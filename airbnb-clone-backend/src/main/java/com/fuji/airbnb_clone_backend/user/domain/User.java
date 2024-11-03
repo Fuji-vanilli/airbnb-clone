@@ -2,10 +2,7 @@ package com.fuji.airbnb_clone_backend.user.domain;
 
 import com.fuji.airbnb_clone_backend.shared.kernel.AbstractAuditingEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "airbnb_user")
-@Data
+@Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 @Builder
 public class User extends AbstractAuditingEntity<Long> {
