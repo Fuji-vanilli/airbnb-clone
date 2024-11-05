@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpStatusCode } from '@angular/common/http';
 import { computed, inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { State } from './model/state.model';
 import { User } from './model/user.model';
@@ -23,10 +23,26 @@ export class AuthService {
   constructor() { }
 
   fetch(forceResync: boolean) {
-    this.fetchHttpUser(forceResync);
+    this.fetchHttpUser(forceResync).subscribe({
+      next: user=> this.fetchUsers$.set(State.Builder<User>().forSuccess(user)),
+      error: err=> {
+        if (err.status=== HttpStatusCode.Unauthorized && this.isAuthenticated()) {
+          this.fetchUsers$.set(State.Builder<User>().forError(err));
+        }
+      }
+    });
+  }
+
+  isAuthenticated() : boolean{
+    if (this.fetchUsers$().value) {
+      return this.fetchUsers$().value?.email!== this.notConnected;
+    } else {
+      return false;
+    }
   }
 
   fetchHttpUser(forceResync: boolean): Observable<User> {
-    return this.httpClient.get<User>(`${environment.API_URL}/auth/get-authenticated-user`);
+    const params= new HttpParams().set('forceResync', forceResync)
+    return this.httpClient.get<User>(`${environment.API_URL}/auth/get-authenticated-user`, {params});
   }
 }
