@@ -4,6 +4,8 @@ import { State } from './model/state.model';
 import { User } from './model/user.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
+import { Location } from '@angular/common';
+import { response } from 'express';
 
 @Injectable({
   providedIn: 'root'
@@ -44,5 +46,18 @@ export class AuthService {
   fetchHttpUser(forceResync: boolean): Observable<User> {
     const params= new HttpParams().set('forceResync', forceResync)
     return this.httpClient.get<User>(`${environment.API_URL}/auth/get-authenticated-user`, {params});
+  }
+
+  login() {
+    location.href= `${location.origin}${this.location.prepareExternalUrl("oauth2/authorization/okta")}`;
+  }
+
+  logout() {
+    this.httpClient.post(`${environment.API_URL}/auth/logout`, {}).subscribe({
+      next: (response: any)=> {
+        this.fetchUsers$.set(State.Builder<User>().forSuccess({email: this.notConnected}))
+        location.href= response.logoutUrl;
+      }
+    })
   }
 }
