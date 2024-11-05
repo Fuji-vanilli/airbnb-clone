@@ -17,27 +17,27 @@ export class AuthService {
 
   notConnected= "NOT_CONNECTED";
 
-  private fetchUsers$: WritableSignal<State<User>> = 
+  private fetchUser$: WritableSignal<State<User>> = 
     signal(State.Builder<User>().forSuccess({email: this.notConnected}));
   
-  fetchUser= computed(()=> this.fetchUsers$());
+  fetchUser= computed(()=> this.fetchUser$());
 
   constructor() { }
 
   fetch(forceResync: boolean) {
     this.fetchHttpUser(forceResync).subscribe({
-      next: user=> this.fetchUsers$.set(State.Builder<User>().forSuccess(user)),
+      next: user=> this.fetchUser$.set(State.Builder<User>().forSuccess(user)),
       error: err=> {
         if (err.status=== HttpStatusCode.Unauthorized && this.isAuthenticated()) {
-          this.fetchUsers$.set(State.Builder<User>().forError(err));
+          this.fetchUser$.set(State.Builder<User>().forError(err));
         }
       }
     });
   }
 
   isAuthenticated() : boolean{
-    if (this.fetchUsers$().value) {
-      return this.fetchUsers$().value?.email!== this.notConnected;
+    if (this.fetchUser$().value) {
+      return this.fetchUser$().value?.email!== this.notConnected;
     } else {
       return false;
     }
@@ -55,9 +55,20 @@ export class AuthService {
   logout() {
     this.httpClient.post(`${environment.API_URL}/auth/logout`, {}).subscribe({
       next: (response: any)=> {
-        this.fetchUsers$.set(State.Builder<User>().forSuccess({email: this.notConnected}))
+        this.fetchUser$.set(State.Builder<User>().forSuccess({email: this.notConnected}))
         location.href= response.logoutUrl;
       }
     })
+  }
+
+  hasAnyAuthority(authorities: string[] | string): boolean {
+    if(this.fetchUser$().value!.email === this.notConnected) {
+      return false;
+    }
+    if(!Array.isArray(authorities)) {
+      authorities = [authorities];
+    }
+    return this.fetchUser$().value!.authorities!
+      .some((authority: string) => authorities.includes(authority));
   }
 }
