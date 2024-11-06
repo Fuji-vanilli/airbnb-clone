@@ -41,6 +41,9 @@ export class NavbarComponent implements OnInit{
 
   private connectedUser: User= {email: this.authService.notConnected};
 
+  login= ()=> this.authService.login();
+  logout= ()=> this.authService.logout();
+
   constructor() {
     effect(()=> {
       if (this.authService.fetchUser().status=== "OK") {
@@ -52,7 +55,6 @@ export class NavbarComponent implements OnInit{
 
   ngOnInit(): void {
     this.authService.fetch(false);
-   // this.fetchMenu();
    // this.toastService.sendMessage({severity: "info", summary: "welcome back to airbnb home page"});
   }
 
@@ -61,23 +63,40 @@ export class NavbarComponent implements OnInit{
       return [
         {
           label: "My properties",
-          RouterLink: "landlord/properties"
+          RouterLink: "landlord/properties",
+          visible: this.hasToBeLandlord()
         },
         {
-          label: "Log in"
+          label: "My booking",
+          RouterLink: "booking",
+        },
+        {
+          label: "My reservation",
+          RouterLink: "landlord/reservation",
+          visible: this.hasToBeLandlord()
+        },
+        {
+          label: "Log out",
+          command: this.logout
         }
       ]
     } else {
       return [
         {
           label: "Sing up",
-          styleClass: "font-bold"
+          styleClass: "font-bold",
+          command: this.login
         },
         {
-          label: "Log in"
+          label: "Log in",
+          command: this.login
         }
       ]
     }
+  }
+
+  hasToBeLandlord() {
+    return this.authService.hasAnyAuthority("ROLE_LANDLORD");
   }
 
 }

@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "authority")
-@Getter
+@Getter @Setter
 @Builder
 @AllArgsConstructor @NoArgsConstructor
 public class Authority implements Serializable {
